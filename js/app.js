@@ -1,5 +1,7 @@
 const inputBox = document.getElementById("input-button")
 const searchButton = document.getElementById("search-btn")
+const foundItem = document.getElementById('found-info')
+
 
 searchButton.addEventListener("click", captureInputValue)
 
@@ -11,17 +13,18 @@ function captureInputValue(){
     }
    
     else {
-        const url = `http://openlibrary.org/search.json?q=${searchText}`
+        const url = `https://openlibrary.org/search.json?q=${searchText}`
         fetch(url)
         .then(res =>res.json())
-        .then(data =>searchResult(data.docs))
+        .then(data =>searchResult(data))   
     }
  
 }
 const searchResult = books =>{
  const foundedBook = document.getElementById("founded-books")
  foundedBook.textContent = ""
-    books.forEach(book=> {
+ const dataArray = books.docs 
+    dataArray.forEach(book=> {
         const div = document.createElement("div")
         div.classList.add("col")
         div.innerHTML = `  
@@ -30,12 +33,13 @@ const searchResult = books =>{
           <div class="card-body">
             <h5 class="card-title">Title: ${book.title}</h5>
             <h5 class="card-title">Athor Name: ${book.author_name}</h5>           
-            <h5 class="card-title">publish Date: ${book.publish_data}</h5>        
+            <h5 class="card-title">Publish Year: ${book.first_publish_year}</h5>        
           </div>
         </div>
       `
       foundedBook.appendChild(div)
-
+      
+      foundItem.innerHTML = `<p>Total result: ${books.numFound}</p>`
     })
    
 }
