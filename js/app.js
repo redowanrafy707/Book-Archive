@@ -1,45 +1,98 @@
-const inputBox = document.getElementById("input-button")
-const searchButton = document.getElementById("search-btn")
-const foundItem = document.getElementById('found-info')
+const inputText = document.getElementById('input-text');
+const errorMassage = document.getElementById('error-massage');
+const foundBookNamber = document.getElementById('founded-book-namber');
+const searchResult = document.getElementById('search-result');
+const spinner = document.getElementById('spiner')
 
-
-searchButton.addEventListener("click", captureInputValue)
-
-function captureInputValue(){
-    const searchText = inputBox.value 
-    inputBox.value = ""
-    if(searchText.length===0){
-       document.getElementById("error-message").innerHTML = "<h5 class='text-center p-3 bg-danger'><b>Please enter a  book Name...</b></h5>";
+//Function:click button
+const button = () =>{
+  errorMassage.textContent ='';
+  foundBookNamber.textContent = '';
+  searchResult.textContent = '';
+  const  inputTextvalue = inputText.value
+  document.getElementById('spiner').classList.remove('d-none')
+  console.log(inputTextvalue);
+  if(inputTextvalue.length === 0){
+      errorMassage.innerHTML =
+      "<h5 class='text-center text-white p-3 bg-danger'><b>Please enter a  book Name...</b></h5>";
+      spinner.classList.add('d-none')
+  }
+  else{
+      const url = `https://openlibrary.org/search.json?q=${inputTextvalue}`
+      fetch(url)
+      .then(res => res.json())
+      .then(data => displaySearchResult(data))
     }
-   
-    else {
-        const url = `https://openlibrary.org/search.json?q=${searchText}`
-        fetch(url)
-        .then(res =>res.json())
-        .then(data =>searchResult(data))   
-    }
- 
 }
-const searchResult = books =>{
- const foundedBook = document.getElementById("founded-books")
- foundedBook.textContent = ""
- const dataArray = books.docs 
-    dataArray.forEach(book=> {
-        const div = document.createElement("div")
-        div.classList.add("col")
-        div.innerHTML = `  
-        <div class="card">
-          <img src="https://covers.openlibrary.org/b/id/$%7BbooksLibrary.cover_i%7D-L.jpg" class="card-img-top" alt="...">
-          <div class="card-body">
-            <h5 class="card-title">Title: ${book.title}</h5>
-            <h5 class="card-title">Athor Name: ${book.author_name}</h5>           
-            <h5 class="card-title">Publish Year: ${book.first_publish_year}</h5>        
-          </div>
-        </div>
-      `
-      foundedBook.appendChild(div)
-      
-      foundItem.innerHTML = `<p>Total result: ${books.numFound}</p>`
-    })
+
+ //  Function: Show Result's
+const showResultNam = (number) =>{
+  if( number === 0){
+    errorMassage.innerHTML =
+    "<h5 class='text-center p-3 bg-info'><b>No Result Found</b></h5>";
+  }
+  else{
+    foundBookNamber.innerHTML =`
+    <h4 class='text-center p-3 m-3 bg-info'>${number} result Found</h4>
    
+    `
+  }
+}
+
+// --- Function Writer name
+const writerName = (name)=>{
+  if(name.author_name === undefined){
+    return 'Author Not Avilable';
+  }
+  else{
+    return `Author: ${name.author_name[0]}` ;
+  }
+}
+
+// --- Function Publisher name
+const publishName= (nam2) =>{
+  if(nam2.publisher === undefined){
+    return ' Publisher Not Avilable';
+  }
+  else{
+    return `Publisher: ${nam2.publisher[0]}`;
+  }
+}
+
+ // --- Function Publish Year
+const publishedDate = (date) =>{
+  if(date.first_publish_year === undefined){
+    return 'Publish date Not Avilable'
+  }
+  else{
+    return `First Publish year: ${date.publish_year[0]}`
+  }
+}
+
+//---- Function  Display Search Result
+
+const displaySearchResult =  books =>{
+  inputText.value ='';
+  showResultNam(books.numFound);
+  const slice = books.docs.slice(0,20)
+  spinner.classList.add('d-none');
+ ///-----For loop
+ slice.forEach(book => {
+  
+    const div = document.createElement('div')
+    div.classList.add('col')
+      div.innerHTML =`
+        <div class="card shadow mx-auto" style="height: 500px; width: 350px" >
+           <img src="https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg" class="card-img-top w-50 mx-auto d-flex p-2"   alt="..." >
+           <div class="card-body d-flex flex-column justify-content-center">
+           <h6 class="card-title text-center">Name: ${book.title}</h6>
+           <p class="card-title text-center">${writerName(book)}</p>
+           <p class="card-title text-center">${publishName(book)}</p>
+           <p class="card-title text-center">${publishedDate(book) }</p>
+           </div>
+       </div>
+         `
+    searchResult.appendChild(div);
+ });
+
 }
